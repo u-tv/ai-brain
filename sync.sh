@@ -1,3 +1,4 @@
+
 #!/bin/bash
 FOLDER=$1
 PROJECT=$2
@@ -16,3 +17,4 @@ git add .
 git commit -m "Auto-sync: $PROJECT"
 git push -u origin main
 echo "✅ SYNCED: $PROJECT SAVED IN $FOLDER"
+
