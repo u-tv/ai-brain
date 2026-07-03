@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="GitFlow Pro - Enterprise GitHub Repository Management & Deployment">
+<meta name="theme-color" content="#0f172a">
+<title>GitFlow Pro - GitHub Deployment</title>
+<style>
+  :root {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --bg-elevated: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-light: #60a5fa;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #06b6d4;
+    --border: #334155;
+    --border-light: #475569;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --transition: 0.2s ease;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2") format("woff2");
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+  .app-container { display: flex; min-height: 100vh; }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 260px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    z-index: 100;
+    transition: transform var(--transition);
+  }
+
+  .sidebar-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px; color: white; flex-shrink: 0;
+  }
+
+  .logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+  .nav-section { margin-bottom: 8px; }
+  .nav-section-title {
+    font-size: 10px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    padding: 8px 12px; margin-bottom: 4px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: all var(--transition);
+    color: var(--text-secondary); font-size: 14px; font-weight: 500;
+    border: none; background: none; width: 100%; text-align: left; position: relative;
+  }
+
+  .nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+  .nav-item.active { background: rgba(59,130,246,0.15); color: var(--accent-light); }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 20px; background: var(--accent); border-radius: 0 3px 3px 0;
+  }
+
+  .nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .user-info {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; background: var(--bg-tertiary);
+    border-radius: var(--radius-sm); margin-bottom: 10px;
+  }
+
+  .user-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+
+  .user-name { font-size: 13px; font-weight: 600; }
+  .user-login { font-size: 11px; color: var(--text-muted); }
+
+  .rate-limit {
+    font-size: 11px; color: var(--text-muted);
+    padding: 6px 12px; display: flex; align-items: center; gap: 6px;
+  }
+
+  .rate-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+  .rate-dot.warning { background: var(--warning); }
+  .rate-dot.danger { background: var(--danger); }
+
+  /* ===== MAIN CONTENT ===== */
+  .main-content { flex: 1; margin-left: 260px; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ===== TOP BAR ===== */
+  .top-bar {
+    height: 64px; background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; position: sticky; top: 0; z-index: 50;
+  }
+
+  .top-bar-left { display: flex; align-items: center; gap: 16px; }
+
+  .menu-toggle {
+    display: none; background: none; border: none; color: var(--text-secondary);
+    cursor: pointer; padding: 8px; border-radius: var(--radius-sm);
+  }
+
+  .menu-toggle:hover { background: var(--bg-tertiary); }
+
+  .page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .breadcrumb { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+  .breadcrumb-sep { opacity: 0.5; }
+
+  .top-bar-right { display: flex; align-items: center; gap: 12px; }
+
+  .search-box { position: relative; }
+  .search-box input {
+    background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 8px 12px 8px 36px; color: var(--text-primary); font-size: 13px; width: 280px;
+    outline: none; transition: all var(--transition);
+  }
+  .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  .search-box input::placeholder { color: var(--text-muted); }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+
+  .top-btn {
+    background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-secondary);
+    padding: 8px 12px; border-radius: var(--radius-sm); cursor: pointer;
+    display: flex; align-items: center; gap: 6px; font-size: 13px;
+    transition: all var(--transition); position: relative;
+  }
+  .top-btn:hover { background: var(--border-light); color: var(--text-primary); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; }
+  .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn-danger { background: var(--danger); border-color: var(--danger); color: white; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-sm { padding: 6px 14px; font-size: 13px; }
+
+  /* ===== CONTENT AREA ===== */
+  .content-area { flex: 1; padding: 28px; overflow-y: auto; }
+
+  /* ===== STATS GRID ===== */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 20px; transition: all var(--transition);
+  }
+  .stat-card:hover { border-color: var(--border-light); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .stat-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+  .stat-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .stat-icon.blue { background: rgba(59,130,246,0.15); color: var(--accent); }
+  .stat-icon.green { background: rgba(34,197,94,0.15); color: var(--success); }
+  .stat-icon.orange { background: rgba(245,158,11,0.15); color: var(--warning); }
+  .stat-icon.red { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .stat-value { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .stat-change { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .stat-change.positive { color: var(--success); }
+  .stat-change.negative { color: var(--danger); }
+
+  /* ===== SECTION ===== */
+  .section { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 24px; overflow: hidden; }
+  .section-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .section-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .section-actions { display: flex; gap: 8px; }
+  .section-body { padding: 0; }
+
+  /* ===== REPO CARDS ===== */
+  .repos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding: 24px; }
+  .repo-card {
+    background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 20px; cursor: pointer; transition: all var(--transition); position: relative; overflow: hidden;
+  }
+  .repo-card:hover { border-color: var(--border-light); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .repo-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+  .repo-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .repo-card-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .repo-card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .repo-card-meta { display: flex; gap: 16px; margin-bottom: 12px; font-size: 12px; color: var(--text-muted); }
+  .repo-card-meta span { display: flex; align-items: center; gap: 4px; }
+  .repo-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); }
+  .repo-card-branch { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .badge-public { background: rgba(34,197,94,0.15); color: var(--success); }
+  .badge-private { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .badge-lang { background: var(--bg-tertiary); color: var(--text-secondary); text-transform: none; }
+
+  /* ===== FILE MANAGER ===== */
+  .file-manager { padding: 24px; }
+  .breadcrumb-path {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .breadcrumb-item {
+    font-size: 14px; color: var(--accent-light); cursor: pointer; padding: 4px 8px;
+    border-radius: var(--radius-sm); transition: background var(--transition);
+  }
+  .breadcrumb-item:hover { background: rgba(59,130,246,0.1); }
+  .breadcrumb-item.active { color: var(--text-primary); cursor: default; }
+  .breadcrumb-item.active:hover { background: none; }
+  .breadcrumb-separator { color: var(--text-muted); font-size: 12px; }
+
+  .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .file-item {
+    background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px; cursor: pointer; transition: all var(--transition); display: flex; flex-direction: column; gap: 8px;
+  }
+  .file-item:hover { border-color: var(--accent); background: rgba(59,130,246,0.05); }
+  .file-item.selected { border-color: var(--accent); background: rgba(59,130,246,0.1); }
+  .file-icon { font-size: 32px; text-align: center; }
+  .file-name { font-size: 13px; font-weight: 600; text-align: center; word-break: break-all; }
+  .file-size { font-size: 11px; color: var(--text-muted); text-align: center; }
+
+  /* ===== FILE EDITOR ===== */
+  .file-editor {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px;
+  }
+  .editor-panel {
+    background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .editor-header {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+  }
+  .editor-body {
+    flex: 1; padding: 16px; overflow: auto;
+  }
+  .code-editor {
+    width: 100%; min-height: 400px;
+    background: var(--bg-primary); border: none;
+    color: var(--text-primary); font-family: var(--font-mono); font-size: 13px;
+    line-height: 1.6; resize: vertical; outline: none;
+  }
+  .code-preview {
+    font-family: var(--font-mono); font-size: 13px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-all;
+  }
+
+  /* Syntax highlighting */
+  .sh-keyword { color: #c678dd; }
+  .sh-string { color: #98c379; }
+  .sh-comment { color: #5c6370; font-style: italic; }
+  .sh-number { color: #d19a66; }
+  .sh-function { color: #61afef; }
+
+  /* ===== DEPLOY PANEL ===== */
+  .deploy-panel { padding: 24px; }
+  .deploy-dropzone {
+    border: 2px dashed var(--border); border-radius: var(--radius-md);
+    padding: 40px; text-align: center; transition: all var(--transition);
+    margin-bottom: 24px; cursor: pointer;
+  }
+  .deploy-dropzone:hover, .deploy-dropzone.dragover {
+    border-color: var(--accent); background: rgba(59,130,246,0.05);
+  }
+  .deploy-dropzone-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+  .deploy-dropzone-text { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+  .deploy-dropzone-hint { font-size: 12px; color: var(--text-muted); }
+
+  .deploy-file-list { margin-bottom: 24px; }
+  .deploy-file-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--bg-primary);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+  }
+  .deploy-file-path { flex: 1; font-size: 13px; font-family: var(--font-mono); }
+  .deploy-file-status { font-size: 12px; font-weight: 600; }
+  .deploy-file-status.pending { color: var(--text-muted); }
+  .deploy-file-status.uploading { color: var(--accent-light); }
+  .deploy-file-status.success { color: var(--success); }
+  .deploy-file-status.error { color: var(--danger); }
+
+  .deploy-progress {
+    width: 100%; height: 6px; background: var(--bg-tertiary); border-radius: 3px;
+    overflow: hidden; margin-bottom: 16px;
+  }
+  .deploy-progress-fill {
+    height: 100%; background: var(--accent); border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  /* ===== ACTIVITY LOG ===== */
+  .activity-log { padding: 24px; }
+  .activity-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-icon {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0;
+  }
+  .activity-content { flex: 1; }
+  .activity-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .activity-text strong { color: var(--text-primary); font-weight: 600; }
+  .activity-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    z-index: 1000; display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; transition: all 0.2s ease;
+  }
+  .modal-overlay.active { opacity: 1; visibility: visible; }
+  .modal { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+    transform: scale(0.95) translateY(10px); transition: transform 0.2s ease; box-shadow: var(--shadow-lg);
+  }
+  .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+  .modal-header { padding: 24px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;
+    border-radius: var(--radius-sm); font-size: 20px; line-height: 1; transition: all var(--transition);
+  }
+  .modal-close:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+  .modal-body { padding: 24px 28px; }
+  .modal-footer { padding: 16px 28px 24px; display: flex; justify-content: flex-end; gap: 10px; }
+
+  .modal-wide { max-width: 900px; }
+
+  /* ===== FORM ===== */
+  .form-group { margin-bottom: 20px; }
+  .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+  .form-label .required { color: var(--danger); margin-left: 2px; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 14px; color: var(--text-primary); font-size: 14px; font-family: inherit;
+    outline: none; transition: all var(--transition);
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+  .form-textarea { resize: vertical; min-height: 100px; }
+  .form-select { cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-error { font-size: 12px; color: var(--danger); margin-top: 4px; display: none; }
+  .form-group.has-error .form-input, .form-group.has-error .form-select { border-color: var(--danger); }
+  .form-group.has-error .form-error { display: block; }
+
+  .input-group { display: flex; gap: 8px; }
+  .input-group .form-input { flex: 1; }
+  .input-group .btn { flex-shrink: 0; }
+
+  .password-toggle {
+    background: var(--bg-tertiary); border: 1px solid var(--border); border-left: none;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-muted);
+    cursor: pointer; padding: 0 12px; display: flex; align-items: center;
+  }
+  .password-toggle:hover { color: var(--text-primary); }
+
+  /* ===== BUTTON ===== */
+  .btn { padding: 10px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600;
+    cursor: pointer; border: 1px solid transparent; transition: all var(--transition);
+    display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn-default { background: var(--bg-tertiary); border-color: var(--border); color: var(--text-secondary); }
+  .btn-default:hover { background: var(--border-light); color: var(--text-primary); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-danger { background: var(--danger); border-color: var(--danger); color: white; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-success { background: var(--success); border-color: var(--success); color: white; }
+  .btn-success:hover { background: #16a34a; }
+  .btn-sm { padding: 6px 14px; font-size: 13px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ===== TOAST ===== */
+  .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+  .toast { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 14px 20px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-lg);
+    min-width: 300px; max-width: 420px; animation: slideIn 0.3s ease; transform-origin: top right;
+  }
+  .toast.hiding { animation: slideOut 0.3s ease forwards; }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(30px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
+  @keyframes slideOut { from { opacity: 1; transform: translateX(0) scale(1); } to { opacity: 0; transform: translateX(30px) scale(0.95); } }
+  .toast-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+  .toast-success .toast-icon { background: rgba(34,197,94,0.15); color: var(--success); }
+  .toast-error .toast-icon { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .toast-warning .toast-icon { background: rgba(245,158,11,0.15); color: var(--warning); }
+  .toast-info .toast-icon { background: rgba(6,182,212,0.15); color: var(--info); }
+  .toast-content { flex: 1; }
+  .toast-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .toast-message { font-size: 13px; color: var(--text-secondary); }
+  .toast-close { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px;
+    font-size: 16px; line-height: 1; transition: color var(--transition);
+  }
+  .toast-close:hover { color: var(--text-primary); }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+  .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-state-title { font-size: 18px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; }
+  .empty-state-text { font-size: 14px; max-width: 400px; margin: 0 auto 20px; }
+
+  /* ===== LOADING ===== */
+  .loading-overlay { position: fixed; inset: 0; background: var(--bg-primary); z-index: 9999;
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+  .loading-overlay.hidden { opacity: 0; visibility: hidden; }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--bg-tertiary); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+
+  /* ===== LOGIN SCREEN ===== */
+  .login-screen { position: fixed; inset: 0; background: var(--bg-primary); z-index: 10000;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .login-card {
+    background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 40px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg);
+  }
+  .login-logo { text-align: center; margin-bottom: 32px; }
+  .login-logo-icon {
+    width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 700; color: white; margin-bottom: 16px;
+  }
+  .login-logo h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .login-logo p { font-size: 14px; color: var(--text-muted); }
+  .login-help { font-size: 12px; color: var(--text-muted); margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); line-height: 1.7; }
+  .login-help a { color: var(--accent-light); text-decoration: none; }
+  .login-help a:hover { text-decoration: underline; }
+
+  /* ===== REPO SELECTOR ===== */
+  .repo-selector { position: relative; }
+  .repo-selector-dropdown {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md);
+    width: 320px; max-height: 400px; overflow-y: auto; box-shadow: var(--shadow-lg);
+    z-index: 100; display: none;
+  }
+  .repo-selector-dropdown.open { display: block; }
+  .repo-selector-search {
+    padding: 12px; border-bottom: 1px solid var(--border);
+  }
+  .repo-selector-search input {
+    width: 100%; background: var(--bg-primary); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text-primary);
+    font-size: 13px; outline: none;
+  }
+  .repo-selector-item {
+    padding: 12px 16px; cursor: pointer; transition: background var(--transition);
+    border-bottom: 1px solid var(--border);
+  }
+  .repo-selector-item:hover { background: var(--bg-tertiary); }
+  .repo-selector-item.active { background: rgba(59,130,246,0.15); }
+  .repo-selector-item-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .repo-selector-item-meta { font-size: 11px; color: var(--text-muted); }
+
+  /* ===== CONFIRM DIALOG ===== */
+  .confirm-dialog { text-align: center; padding: 8px 0; }
+  .confirm-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin: 0 auto 16px;
+  }
+  .confirm-icon.danger { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .confirm-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .confirm-text { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+
+  /* ===== TOOLTIP ===== */
+  [data-tooltip] { position: relative; }
+  [data-tooltip]::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    background: var(--bg-tertiary); color: var(--text-primary); padding: 6px 12px; border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 500; white-space: nowrap; opacity: 0; visibility: hidden;
+    transition: all var(--transition); pointer-events: none; z-index: 100; border: 1px solid var(--border);
+  }
+  [data-tooltip]:hover::after { opacity: 1; visibility: visible; }
+
+  /* ===== SIDEBAR OVERLAY ===== */
+  .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
+  .sidebar-overlay.visible { display: block; }
+
+  /* ===== OFFLINE BANNER ===== */
+  .offline-banner { background: var(--warning); color: #1a1a1a; padding: 10px 20px; text-align: center;
+    font-size: 13px; font-weight: 600; display: none; position: sticky; top: 64px; z-index: 40;
+  }
+  .offline-banner.visible { display: block; }
+
+  /* ===== ANIMATIONS ===== */
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== FOCUS STYLES ===== */
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  ::selection { background: rgba(59,130,246,0.3); color: var(--text-primary); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .file-editor { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main-content { margin-left: 0; }
+    .menu-toggle { display: flex; }
+    .search-box input { width: 180px; }
+  }
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .content-area { padding: 16px; }
+    .search-box { display: none; }
+    .top-bar { padding: 0 16px; }
+    .repos-grid { grid-template-columns: 1fr; }
+    .file-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ===== LIGHT MODE ===== */
+  body.light-mode {
+    --bg-primary: #f8fafc; --bg-secondary: #ffffff; --bg-tertiary: #f1f5f9; --bg-elevated: #ffffff;
+    --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #94a3b8;
+    --border: #e2e8f0; --border-light: #cbd5e1;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px rgba(0,0,0,0.07); --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+  }
+  body.light-mode .file-item { background: #ffffff; }
+  body.light-mode .editor-panel { background: #ffffff; }
+  body.light-mode .code-editor { background: #ffffff; }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">GF</div>
+      <h2>GitFlow Pro</h2>
+      <p>Enterprise GitHub Repository Management</p>
+    </div>
+    <form id="loginForm" onsubmit="return false">
+      <div class="form-group">
+        <label class="form-label">GitHub Personal Access Token <span class="required">*</span></label>
+        <div class="input-group">
+          <input type="password" class="form-input" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="border-radius:var(--radius-sm) 0 0 var(--radius-sm);flex:1">
+          <button type="button" class="password-toggle" onclick="toggleTokenVisibility()">
+            <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="form-error">Token is required</div>
+      </div>
+      <button type="button" class="btn btn-primary" style="width:100%;justify-content:center" onclick="authenticate()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Connect to GitHub
+      </button>
+    </form>
+    <div class="login-help">
+      <strong>How to get your token:</strong><br>
+      1. Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings &rarr; Developer settings &rarr; Personal access tokens</a><br>
+      2. Click "Generate new token (classic)"<br>
+      3. Select scopes: <code>repo</code>, <code>delete_repo</code><br>
+      4. Copy and paste the token above
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOADING OVERLAY ===== -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Connecting to GitHub...</div>
+</div>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== SIDEBAR OVERLAY ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ===== APP CONTAINER ===== -->
+<div class="app-container" id="appContainer" style="display:none">
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar" id="sidebar" role="navigation" aria-label="Main Navigation">
+  <div class="sidebar-header">
+    <div class="logo-icon">GF</div>
+    <div>
+      <div class="logo-text">GitFlow</div>
+      <div class="logo-sub">Pro</div>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">Overview</div>
+      <button class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')" aria-label="Dashboard">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </span>
+        Dashboard
+      </button>
+      <button class="nav-item" data-page="repositories" onclick="navigateTo('repositories')" aria-label="Repositories">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </span>
+        Repositories
+      </button>
+      <button class="nav-item" data-page="files" onclick="navigateTo('files')" aria-label="File Manager">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </span>
+        File Manager
+      </button>
+      <button class="nav-item" data-page="deploy" onclick="navigateTo('deploy')" aria-label="Deploy">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </span>
+        Deploy
+      </button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">System</div>
+      <button class="nav-item" data-page="activity" onclick="navigateTo('activity')" aria-label="Activity Log">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </span>
+        Activity Log
+      </button>
+      <button class="nav-item" data-page="settings" onclick="navigateTo('settings')" aria-label="Settings">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </span>
+        Settings
+      </button>
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-info" id="sidebarUserInfo">
+      <div class="user-avatar" id="sidebarUserAvatar">?</div>
+      <div>
+        <div class="user-name" id="sidebarUserName">Not connected</div>
+        <div class="user-login" id="sidebarUserLogin">-</div>
+      </div>
+    </div>
+    <div class="rate-limit" id="rateLimitInfo">
+      <div class="rate-dot" id="rateDot"></div>
+      <span id="rateText">API: --</span>
+    </div>
+    <button class="nav-item" onclick="logout()" style="margin-top:8px">
+      <span class="nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </span>
+      Logout
+    </button>
+  </div>
+</nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main-content">
+
+<!-- ===== OFFLINE BANNER ===== -->
+<div class="offline-banner" id="offlineBanner">
+  <span style="margin-right:6px">&#9888;</span> You are offline. Changes will be queued and synced when you reconnect.
+</div>
+
+<!-- ===== TOP BAR ===== -->
+<header class="top-bar">
+  <div class="top-bar-left">
+    <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Toggle menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div>
+      <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      <div class="breadcrumb" id="breadcrumb">
+        <span>GitFlow Pro</span>
+        <span class="breadcrumb-sep">/</span>
+        <span id="breadcrumbCurrent">Dashboard</span>
+      </div>
+    </div>
+  </div>
+  <div class="top-bar-right">
+    <div class="search-box">
+      <span class="search-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+      <input type="text" id="globalSearch" placeholder="Search repositories..." oninput="handleGlobalSearch(this.value)">
+    </div>
+    <div class="repo-selector">
+      <button class="top-btn" id="repoSelectorBtn" onclick="toggleRepoSelector()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span id="currentRepoName">Select Repo</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="repo-selector-dropdown" id="repoSelectorDropdown">
+        <div class="repo-selector-search">
+          <input type="text" id="repoSelectorSearch" placeholder="Search repositories..." oninput="filterRepoSelector(this.value)">
+        </div>
+        <div id="repoSelectorList"></div>
+      </div>
+    </div>
+    <button class="top-btn btn-primary" onclick="openRepoModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Repo
+    </button>
+  </div>
+</header>
+
+<!-- ===== CONTENT AREA ===== -->
+<div class="content-area" id="contentArea">
+
+<!-- ==================== DASHBOARD PAGE ==================== -->
+<div class="page" id="page-dashboard">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-header"><span class="stat-label">Total Repositories</span><div class="stat-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div></div>
+      <div class="stat-value" id="dashTotalRepos">0</div>
+      <div class="stat-change positive"><span>Connected to GitHub</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header"><span class="stat-label">Public Repos</span><div class="stat-icon green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div></div>
+      <div class="stat-value" id="dashPublicRepos">0</div>
+      <div class="stat-change positive"><span>Visible to everyone</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header"><span class="stat-label">Private Repos</span><div class="stat-icon orange"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div></div>
+      <div class="stat-value" id="dashPrivateRepos">0</div>
+      <div class="stat-change positive"><span>Restricted access</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-header"><span class="stat-label">API Rate Limit</span><div class="stat-icon red" id="dashRateIcon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div></div>
+      <div class="stat-value" id="dashRateLimit">--</div>
+      <div class="stat-change" id="dashRateText"><span>Requests remaining</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Recent Repositories</div>
+      <div class="section-actions"><button class="top-btn btn-sm" onclick="navigateTo('repositories')">View All</button></div>
+    </div>
+    <div class="section-body"><div class="repos-grid" id="dashReposGrid"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Recent Activity</div>
+    </div>
+    <div class="section-body"><div class="activity-log" id="dashActivityLog"></div></div>
+  </div>
+</div>
+
+<!-- ==================== REPOSITORIES PAGE ==================== -->
+<div class="page" id="page-repositories" style="display:none">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> All Repositories</div>
+      <div class="section-actions">
+        <button class="top-btn btn-sm" onclick="refreshRepos()">Refresh</button>
+        <button class="top-btn btn-primary btn-sm" onclick="openRepoModal()">New Repo</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div style="padding:16px 24px;border-bottom:1px solid var(--border)">
+        <input type="text" class="form-input" id="repoSearchInput" placeholder="Search repositories..." style="max-width:400px" oninput="filterReposPage(this.value)">
+      </div>
+      <div class="repos-grid" id="reposPageGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FILE MANAGER PAGE ==================== -->
+<div class="page" id="page-files" style="display:none">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> File Manager</div>
+      <div class="section-actions">
+        <button class="top-btn btn-sm" onclick="createNewFile()">New File</button>
+        <button class="top-btn btn-sm" onclick="createNewFolder()">New Folder</button>
+        <button class="top-btn btn-sm" onclick="refreshFiles()">Refresh</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="file-manager">
+        <div class="breadcrumb-path" id="fileBreadcrumb"></div>
+        <div class="file-grid" id="fileGrid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DEPLOY PAGE ==================== -->
+<div class="page" id="page-deploy" style="display:none">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Deploy to Repository</div>
+    </div>
+    <div class="section-body">
+      <div class="deploy-panel">
+        <div class="deploy-dropzone" id="deployDropzone" onclick="document.getElementById('deployFileInput').click()"
+          ondragover="event.preventDefault();this.classList.add('dragover')"
+          ondragleave="this.classList.remove('dragover')"
+          ondrop="handleDeployDrop(event)">
+          <div class="deploy-dropzone-icon">&#128193;</div>
+          <div class="deploy-dropzone-text">Drop files or folders here, or click to browse</div>
+          <div class="deploy-dropzone-hint">Supports multiple files and entire folders</div>
+        </div>
+        <input type="file" id="deployFileInput" style="display:none" multiple webkitdirectory onchange="handleDeployFiles(this.files)">
+
+        <div class="form-group">
+          <label class="form-label">Target Branch</label>
+          <input type="text" class="form-input" id="deployBranch" placeholder="main" value="main">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Commit Message</label>
+          <input type="text" class="form-input" id="deployMessage" placeholder="Deploy from GitFlow Pro">
+        </div>
+        <div class="form-group">
+          <label class="form-label"><input type="checkbox" id="deployOverwrite" style="margin-right:8px"> Overwrite existing files</label>
+        </div>
+
+        <div class="deploy-progress" id="deployProgress" style="display:none">
+          <div class="deploy-progress-fill" id="deployProgressFill" style="width:0%"></div>
+        </div>
+
+        <div class="deploy-file-list" id="deployFileList"></div>
+
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:20px">
+          <button class="btn btn-default" onclick="clearDeployQueue()">Clear All</button>
+          <button class="btn btn-primary" id="deployBtn" onclick="startDeploy()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Deploy Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ACTIVITY PAGE ==================== -->
+<div class="page" id="page-activity" style="display:none">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Activity Log</div>
+      <div class="section-actions"><button class="top-btn btn-sm" onclick="clearActivityLog()">Clear Log</button></div>
+    </div>
+    <div class="section-body"><div class="activity-log" id="fullActivityLog"></div></div>
+  </div>
+</div>
+
+<!-- ==================== SETTINGS PAGE ==================== -->
+<div class="page" id="page-settings" style="display:none">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</div>
+    </div>
+    <div class="section-body" style="padding:24px">
+      <div class="settings-section" style="margin-bottom:28px">
+        <div class="settings-section-title" style="font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)">GitHub Token</div>
+        <div class="form-group">
+          <label class="form-label">Personal Access Token</label>
+          <div class="input-group">
+            <input type="password" class="form-input" id="settingsToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="border-radius:var(--radius-sm) 0 0 var(--radius-sm)">
+            <button type="button" class="password-toggle" onclick="toggleSettingsToken()">
+              <svg id="settingsEyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveSettingsToken()">Update Token</button>
+      </div>
+
+      <div class="settings-section" style="margin-bottom:28px">
+        <div class="settings-section-title" style="font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)">Appearance</div>
+        <div class="setting-row" style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+          <div><h4 style="font-size:14px;font-weight:600;margin-bottom:4px">Light Mode</h4><p style="font-size:13px;color:var(--text-muted)">Switch between dark and light theme</p></div>
+          <button class="toggle" id="toggleLightMode" onclick="toggleLightMode()"></button>
+        </div>
+      </div>
+
+      <div class="settings-section" style="margin-bottom:28px">
+        <div class="settings-section-title" style="font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)">Data Management</div>
+        <div class="data-actions" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
+          <div class="data-action-card" style="flex:1;min-width:200px;background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px;text-align:center;cursor:pointer;transition:all var(--transition)" onclick="exportAllData()">
+            <div class="data-action-icon" style="font-size:28px;margin-bottom:10px">&#128229;</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px">Export All Data</div>
+            <div style="font-size:12px;color:var(--text-muted)">Download settings and activity log</div>
+          </div>
+          <div class="data-action-card" style="flex:1;min-width:200px;background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px;text-align:center;cursor:pointer;transition:all var(--transition)" onclick="document.getElementById('importFile').click()">
+            <div class="data-action-icon" style="font-size:28px;margin-bottom:10px">&#128228;</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px">Import Data</div>
+            <div style="font-size:12px;color:var(--text-muted)">Restore from exported JSON</div>
+          </div>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title" style="font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)">Danger Zone</div>
+        <div class="setting-row" style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)">
+          <div><h4 style="font-size:14px;font-weight:600;margin-bottom:4px;color:var(--danger)">Clear All Local Data</h4><p style="font-size:13px;color:var(--text-muted)">Permanently delete all local settings and activity log</p></div>
+          <button class="btn btn-danger btn-sm" onclick="confirmClearAll()">Clear All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content-area -->
+</main>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Repo Modal -->
+<div class="modal-overlay" id="repoModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="repoModalTitle">Create Repository</div>
+      <button class="modal-close" onclick="closeRepoModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="repoForm" onsubmit="return false">
+        <div class="form-group">
+          <label class="form-label">Repository Name <span class="required">*</span></label>
+          <input type="text" class="form-input" id="repoName" placeholder="my-awesome-project">
+          <div class="form-error">Repository name is required</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input type="text" class="form-input" id="repoDesc" placeholder="A short description of your project">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Visibility</label>
+            <select class="form-select" id="repoVisibility">
+              <option value="public">Public</option>
+              <option value="private">Private</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Initialize with README</label>
+            <select class="form-select" id="repoAutoInit">
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeRepoModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="createRepo()">Create Repository</button>
+    </div>
+  </div>
+</div>
+
+<!-- File Editor Modal -->
+<div class="modal-overlay" id="fileEditorModal">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <div class="modal-title" id="fileEditorTitle">Edit File</div>
+      <button class="modal-close" onclick="closeFileEditor()">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div class="file-editor" style="padding:0">
+        <div class="editor-panel" style="border:none;border-radius:0">
+          <div class="editor-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editor</div>
+          <div class="editor-body"><textarea class="code-editor" id="fileEditorContent" placeholder="Enter file content..."></textarea></div>
+        </div>
+        <div class="editor-panel" style="border:none;border-radius:0;border-left:1px solid var(--border)">
+          <div class="editor-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Preview</div>
+          <div class="editor-body"><div class="code-preview" id="fileEditorPreview"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeFileEditor()">Cancel</button>
+      <button class="btn btn-primary" id="saveFileBtn" onclick="saveFileFromEditor()">Save File</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-body">
+      <div class="confirm-dialog">
+        <div class="confirm-icon danger" id="confirmIcon">&#9888;</div>
+        <div class="confirm-title" id="confirmTitle">Are you sure?</div>
+        <div class="confirm-text" id="confirmText">This action cannot be undone.</div>
+        <div style="display:flex;gap:10px;justify-content:center">
+          <button class="btn btn-default" onclick="closeConfirmModal()">Cancel</button>
+          <button class="btn btn-danger" id="confirmBtn" onclick="executeConfirm()">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+const API_BASE = 'https://api.github.com';
+const HEADERS = (token) => ({
+  'Accept': 'application/vnd.github+json',
+  'Authorization': `Bearer ${token}`,
+  'X-GitHub-Api-Version': '2026-03-10'
+});
+
+// ==================== STATE ====================
+let state = {
+  token: null,
+  user: null,
+  repos: [],
+  selectedRepo: null,
+  currentPath: '',
+  files: [],
+  deployQueue: [],
+  settings: {},
+  activityLog: [],
+  rateLimit: { remaining: 0, limit: 0, reset: 0 },
+  isOnline: navigator.onLine,
+  currentPage: 'dashboard',
+  fileEditor: { path: '', sha: '', isNew: false }
+};
+
+// ==================== LOCAL STORAGE ====================
+const Store = {
+  get(key, def) { try { const v = localStorage.getItem('gf_' + key); return v ? JSON.parse(v) : def; } catch(e) { return def; } },
+  set(key, val) { try { localStorage.setItem('gf_' + key, JSON.stringify(val)); } catch(e) {} },
+  remove(key) { try { localStorage.removeItem('gf_' + key); } catch(e) {} }
+};
+
+function loadState() {
+  state.token = Store.get('token', null);
+  state.user = Store.get('user', null);
+  state.selectedRepo = Store.get('selectedRepo', null);
+  state.settings = Store.get('settings', { lightMode: false });
+  state.activityLog = Store.get('activityLog', []);
+}
+
+function saveState() {
+  Store.set('token', state.token);
+  Store.set('user', state.user);
+  Store.set('selectedRepo', state.selectedRepo);
+  Store.set('settings', state.settings);
+  Store.set('activityLog', state.activityLog);
+}
+
+// ==================== UTILITIES ====================
+function escapeHtml(str) { if (!str) return ''; return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(iso) { if (!iso) return '-'; const d = new Date(iso); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+function formatDateTime(iso) { if (!iso) return '-'; const d = new Date(iso); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+function formatSize(bytes) { if (!bytes) return '0 B'; const k = 1024; const sizes = ['B','KB','MB','GB']; const i = Math.floor(Math.log(bytes)/Math.log(k)); return parseFloat((bytes/Math.pow(k,i)).toFixed(1)) + ' ' + sizes[i]; }
+function getFileIcon(name) {
+  const ext = name.split('.').pop().toLowerCase();
+  const map = { js: '&#128187;', ts: '&#128187;', jsx: '&#128187;', tsx: '&#128187;', html: '&#128204;', css: '&#128207;', scss: '&#128207;', json: '&#128196;', md: '&#128221;', py: '&#128013;', java: '&#9749;', cpp: '&#128295;', c: '&#128295;', go: '&#128034;', rs: '&#129408;', php: '&#128421;', rb: '&#128142;', sh: '&#128435;', yml: '&#9881;', yaml: '&#9881;', xml: '&#128220;', svg: '&#127912;', png: '&#127912;', jpg: '&#127912;', jpeg: '&#127912;', gif: '&#127912;', pdf: '&#128196;', zip: '&#128194;', txt: '&#128196;' };
+  return map[ext] || '&#128196;';
+}
+function getLanguageColor(lang) {
+  const colors = { JavaScript: '#f1e05a', TypeScript: '#2b7489', Python: '#3572A5', Java: '#b07219', 'C++': '#f34b7d', Go: '#00ADD8', Rust: '#dea584', PHP: '#4F5D95', Ruby: '#701516', HTML: '#e34c26', CSS: '#563d7c', Shell: '#89e051', Vue: '#41b883', Swift: '#ffac45', Kotlin: '#A97BFF', Dart: '#00B4AB' };
+  return colors[lang] || '#8b949e';
+}
+function b64EncodeUnicode(str) { return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1))); }
+function b64DecodeUnicode(str) { try { return decodeURIComponent(Array.prototype.map.call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')); } catch(e) { return atob(str); } }
+
+// ==================== TOAST ====================
+function showToast(type, title, message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  const icons = { success: '&#10003;', error: '&#10007;', warning: '&#9888;', info: '&#8505;' };
+  toast.innerHTML = `<div class="toast-icon">${icons[type] || '&#8505;'}</div><div class="toast-content"><div class="toast-title">${escapeHtml(title)}</div><div class="toast-message">${escapeHtml(message)}</div></div><button class="toast-close" onclick="this.parentElement.remove()">&times;</button>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.classList.add('hiding'); setTimeout(() => toast.remove(), 300); }, 4000);
+}
+
+// ==================== ACTIVITY LOG ====================
+function addActivity(type, text) {
+  state.activityLog.unshift({ type, text, time: new Date().toISOString() });
+  if (state.activityLog.length > 200) state.activityLog = state.activityLog.slice(0, 200);
+  saveState();
+  if (state.currentPage === 'activity' || state.currentPage === 'dashboard') renderPage('activity');
+}
+
+function getActivityIcon(type) {
+  const map = { 'repo-created': 'blue', 'repo-deleted': 'red', 'repo-updated': 'orange', 'file-created': 'green', 'file-updated': 'blue', 'file-deleted': 'red', 'deploy': 'green', 'login': 'blue', 'logout': 'orange', 'error': 'red' };
+  return map[type] || 'blue';
+}
+
+function getActivityIconSymbol(type) {
+  const map = { 'repo-created': '&#43;', 'repo-deleted': '&#10007;', 'repo-updated': '&#9998;', 'file-created': '&#43;', 'file-updated': '&#9998;', 'file-deleted': '&#10007;', 'deploy': '&#9654;', 'login': '&#9786;', 'logout': '&#9785;', 'error': '&#9888;' };
+  return map[type] || '&#9679;';
+}
+
+// ==================== API FUNCTIONS ====================
+async function apiRequest(url, options = {}) {
+  if (!state.token) throw new Error('Not authenticated');
+  const opts = {
+    ...options,
+    headers: { ...HEADERS(state.token), ...(options.headers || {}) }
+  };
+  try {
+    const res = await fetch(url, opts);
+    const rateRemaining = res.headers.get('x-ratelimit-remaining');
+    const rateLimit = res.headers.get('x-ratelimit-limit');
+    const rateReset = res.headers.get('x-ratelimit-reset');
+    if (rateRemaining) {
+      state.rateLimit = { remaining: parseInt(rateRemaining), limit: parseInt(rateLimit), reset: parseInt(rateReset) * 1000 };
+      updateRateLimitUI();
+    }
+    if (res.status === 401) { showToast('error', 'Authentication Failed', 'Your token is invalid or expired. Please log in again.'); logout(); throw new Error('Unauthorized'); }
+    if (res.status === 403) { showToast('error', 'Rate Limited', 'You have exceeded the GitHub API rate limit. Please wait before trying again.'); throw new Error('Rate limited'); }
+    if (res.status === 404) { throw new Error('Not found'); }
+    if (res.status === 422) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Validation failed'); }
+    if (!res.ok) { throw new Error(`HTTP ${res.status}`); }
+    if (res.status === 204) return null;
+    return await res.json().catch(() => null);
+  } catch (err) {
+    if (!state.isOnline) { showToast('warning', 'Offline', 'You are offline. Please check your connection.'); }
+    throw err;
+  }
+}
+
+async function getUser() { return await apiRequest(`${API_BASE}/user`); }
+async function getRepos() { return await apiRequest(`${API_BASE}/user/repos?per_page=100&sort=updated&affiliation=owner,collaborator`); }
+async function getRepo(owner, repo) { return await apiRequest(`${API_BASE}/repos/${owner}/${repo}`); }
+async function createRepoAPI(data) { return await apiRequest(`${API_BASE}/user/repos`, { method: 'POST', body: JSON.stringify(data) }); }
+async function updateRepoAPI(owner, repo, data) { return await apiRequest(`${API_BASE}/repos/${owner}/${repo}`, { method: 'PATCH', body: JSON.stringify(data) }); }
+async function deleteRepoAPI(owner, repo) { return await apiRequest(`${API_BASE}/repos/${owner}/${repo}`, { method: 'DELETE' }); }
+async function getContents(owner, repo, path, branch) {
+  let url = `${API_BASE}/repos/${owner}/${repo}/contents/${path}`;
+  if (branch) url += `?ref=${encodeURIComponent(branch)}`;
+  return await apiRequest(url);
+}
+async function createOrUpdateFile(owner, repo, path, message, content, sha, branch) {
+  const body = { message, content: b64EncodeUnicode(content), branch: branch || 'main' };
+  if (sha) body.sha = sha;
+  return await apiRequest(`${API_BASE}/repos/${owner}/${repo}/contents/${path}`, { method: 'PUT', body: JSON.stringify(body) });
+}
+async function deleteFileAPI(owner, repo, path, message, sha, branch) {
+  return await apiRequest(`${API_BASE}/repos/${owner}/${repo}/contents/${path}`, {
+    method: 'DELETE',
+    body: JSON.stringify({ message, sha, branch: branch || 'main' })
+  });
+}
+async function getRateLimit() { return await apiRequest(`${API_BASE}/rate_limit`); }
+
+// ==================== AUTH ====================
+async function authenticate() {
+  const tokenInput = document.getElementById('githubToken');
+  const token = tokenInput.value.trim();
+  if (!token) { tokenInput.closest('.form-group').classList.add('has-error'); return; }
+  tokenInput.closest('.form-group').classList.remove('has-error');
+
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('loadingOverlay').querySelector('.loading-text').textContent = 'Validating token...';
+
+  try {
+    state.token = token;
+    const user = await getUser();
+    state.user = user;
+    saveState();
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'flex';
+    updateUserInfo();
+    await loadRepos();
+    navigateTo('dashboard');
+    addActivity('login', `Logged in as ${user.login}`);
+    showToast('success', 'Connected', `Welcome, ${user.name || user.login}!`);
+  } catch (err) {
+    state.token = null;
+    showToast('error', 'Connection Failed', err.message || 'Could not connect to GitHub. Please check your token.');
+  } finally {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }
+}
+
+function logout() {
+  state.token = null;
+  state.user = null;
+  state.repos = [];
+  state.selectedRepo = null;
+  state.files = [];
+  saveState();
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appContainer').style.display = 'none';
+  document.getElementById('githubToken').value = '';
+  addActivity('logout', 'Logged out');
+  showToast('info', 'Logged Out', 'You have been logged out.');
+}
+
+function updateUserInfo() {
+  if (!state.user) return;
+  const avatar = document.getElementById('sidebarUserAvatar');
+  const name = document.getElementById('sidebarUserName');
+  const login = document.getElementById('sidebarUserLogin');
+  if (avatar) { avatar.textContent = (state.user.name || state.user.login).charAt(0).toUpperCase(); avatar.style.background = `linear-gradient(135deg, var(--accent), var(--accent-light))`; }
+  if (name) name.textContent = state.user.name || state.user.login;
+  if (login) login.textContent = '@' + state.user.login;
+}
+
+function toggleTokenVisibility() {
+  const input = document.getElementById('githubToken');
+  const icon = document.getElementById('eyeIcon');
+  if (input.type === 'password') { input.type = 'text'; icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'; }
+  else { input.type = 'password'; icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'; }
+}
+
+function toggleSettingsToken() {
+  const input = document.getElementById('settingsToken');
+  const icon = document.getElementById('settingsEyeIcon');
+  if (input.type === 'password') { input.type = 'text'; icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'; }
+  else { input.type = 'password'; icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'; }
+}
+
+async function loadRepos() {
+  try {
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+    document.getElementById('loadingOverlay').querySelector('.loading-text').textContent = 'Loading repositories...';
+    state.repos = await getRepos();
+    updateRepoSelector();
+    saveState();
+  } catch (err) {
+    showToast('error', 'Failed to Load', err.message);
+  } finally {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }
+}
+
+function refreshRepos() { loadRepos(); showToast('info', 'Refreshing', 'Updating repository list...'); }
+
+function updateRateLimitUI() {
+  const dot = document.getElementById('rateDot');
+  const text = document.getElementById('rateText');
+  if (!dot || !text) return;
+  const pct = state.rateLimit.limit > 0 ? (state.rateLimit.remaining / state.rateLimit.limit) : 0;
+  dot.className = 'rate-dot';
+  if (pct < 0.1) dot.classList.add('danger');
+  else if (pct < 0.3) dot.classList.add('warning');
+  text.textContent = `API: ${state.rateLimit.remaining}/${state.rateLimit.limit}`;
+}
+
+// ==================== NAVIGATION ====================
+function navigateTo(page) {
+  state.currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  const target = document.getElementById('page-' + page);
+  if (target) { target.style.display = 'block'; target.classList.add('fade-in'); }
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navItem) navItem.classList.add('active');
+  const titles = { dashboard: 'Dashboard', repositories: 'Repositories', files: 'File Manager', deploy: 'Deploy', activity: 'Activity Log', settings: 'Settings' };
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  document.getElementById('breadcrumbCurrent').textContent = titles[page] || page;
+  closeSidebar();
+  renderPage(page);
+  window.scrollTo(0, 0);
+}
+
+function renderPage(page) {
+  if (page === 'dashboard') renderDashboard();
+  else if (page === 'repositories') renderRepositories();
+  else if (page === 'files') renderFileManager();
+  else if (page === 'deploy') renderDeploy();
+  else if (page === 'activity') renderActivity();
+  else if (page === 'settings') renderSettings();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('visible');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('visible');
+}
+
+// ==================== REPO SELECTOR ====================
+function updateRepoSelector() {
+  const btn = document.getElementById('currentRepoName');
+  if (state.selectedRepo) {
+    btn.textContent = state.selectedRepo.name;
+  } else {
+    btn.textContent = state.repos.length > 0 ? 'Select Repo' : 'No Repos';
+  }
+  renderRepoSelectorList();
+}
+
+function renderRepoSelectorList() {
+  const list = document.getElementById('repoSelectorList');
+  const search = (document.getElementById('repoSelectorSearch')?.value || '').toLowerCase();
+  let filtered = state.repos;
+  if (search) filtered = filtered.filter(r => r.name.toLowerCase().includes(search) || (r.description || '').toLowerCase().includes(search));
+  if (filtered.length === 0) { list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px">No repositories found</div>'; return; }
+  list.innerHTML = filtered.map(r => `
+    <div class="repo-selector-item ${state.selectedRepo?.full_name === r.full_name ? 'active' : ''}" onclick="selectRepo('${r.full_name}')">
+      <div class="repo-selector-item-name">${escapeHtml(r.name)}</div>
+      <div class="repo-selector-item-meta">${r.private ? 'Private' : 'Public'} · ${r.default_branch || 'main'} · Updated ${formatDate(r.updated_at)}</div>
+    </div>
+  `).join('');
+}
+
+function toggleRepoSelector() {
+  document.getElementById('repoSelectorDropdown').classList.toggle('open');
+  if (document.getElementById('repoSelectorDropdown').classList.contains('open')) renderRepoSelectorList();
+}
+
+function filterRepoSelector(query) { renderRepoSelectorList(); }
+
+function selectRepo(fullName) {
+  const repo = state.repos.find(r => r.full_name === fullName);
+  if (repo) {
+    state.selectedRepo = repo;
+    state.currentPath = '';
+    saveState();
+    updateRepoSelector();
+    document.getElementById('repoSelectorDropdown').classList.remove('open');
+    showToast('success', 'Repository Selected', `Now working with ${repo.name}`);
+    if (state.currentPage === 'files') renderFileManager();
+    else if (state.currentPage === 'deploy') renderDeploy();
+  }
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+  document.getElementById('dashTotalRepos').textContent = state.repos.length;
+  document.getElementById('dashPublicRepos').textContent = state.repos.filter(r => !r.private).length;
+  document.getElementById('dashPrivateRepos').textContent = state.repos.filter(r => r.private).length;
+  document.getElementById('dashRateLimit').textContent = state.rateLimit.remaining;
+  const pct = state.rateLimit.limit > 0 ? (state.rateLimit.remaining / state.rateLimit.limit) : 0;
+  const icon = document.getElementById('dashRateIcon');
+  if (icon) { icon.className = 'stat-icon ' + (pct < 0.1 ? 'red' : pct < 0.3 ? 'orange' : 'green'); }
+
+  const recent = [...state.repos].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)).slice(0, 6);
+  const grid = document.getElementById('dashReposGrid');
+  grid.innerHTML = recent.map(r => renderRepoCard(r)).join('');
+
+  const activities = state.activityLog.slice(0, 8);
+  const log = document.getElementById('dashActivityLog');
+  log.innerHTML = activities.length > 0 ? activities.map(a => renderActivityItem(a)).join('') : '<div class="empty-state"><div class="empty-state-icon">&#128220;</div><div class="empty-state-title">No activity yet</div><div class="empty-state-text">Activity will appear here as you work with repositories.</div></div>';
+}
+
+function renderRepoCard(r) {
+  const lang = r.language || 'Unknown';
+  const langColor = getLanguageColor(lang);
+  return `<div class="repo-card" onclick="selectRepo('${r.full_name}');navigateTo('files')">
+    <div class="repo-card-header">
+      <div><div class="repo-card-title">${escapeHtml(r.name)}</div></div>
+      <span class="badge ${r.private ? 'badge-private' : 'badge-public'}">${r.private ? 'Private' : 'Public'}</span>
+    </div>
+    <div class="repo-card-desc">${escapeHtml(r.description || 'No description')}</div>
+    <div class="repo-card-meta">
+      <span><span style="width:10px;height:10px;border-radius:50%;background:${langColor};display:inline-block;margin-right:4px"></span>${lang}</span>
+      <span>&#9733; ${r.stargazers_count || 0}</span>
+      <span>&#9679; ${r.open_issues_count || 0} issues</span>
+    </div>
+    <div class="repo-card-footer">
+      <div class="repo-card-branch">${r.default_branch || 'main'}</div>
+      <div style="font-size:11px;color:var(--text-muted)">Updated ${formatDate(r.updated_at)}</div>
+    </div>
+  </div>`;
+}
+
+function renderActivityItem(a) {
+  const color = getActivityIcon(a.type);
+  const symbol = getActivityIconSymbol(a.type);
+  return `<div class="activity-item">
+    <div class="activity-icon" style="background:${color === 'green' ? 'rgba(34,197,94,0.15)' : color === 'red' ? 'rgba(239,68,68,0.15)' : 'rgba(59,130,246,0.15)'};color:${color === 'green' ? 'var(--success)' : color === 'red' ? 'var(--danger)' : 'var(--accent)'}">${symbol}</div>
+    <div class="activity-content"><div class="activity-text">${escapeHtml(a.text)}</div><div class="activity-time">${formatDateTime(a.time)}</div></div>
+  </div>`;
+}
+
+// ==================== REPOSITORIES PAGE ====================
+function renderRepositories() {
+  const search = (document.getElementById('repoSearchInput')?.value || '').toLowerCase();
+  let filtered = state.repos;
+  if (search) filtered = filtered.filter(r => r.name.toLowerCase().includes(search) || (r.description || '').toLowerCase().includes(search));
+  const grid = document.getElementById('reposPageGrid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">&#128193;</div><div class="empty-state-title">No repositories found</div><div class="empty-state-text">${search ? 'No repos match your search.' : 'Create a new repository to get started.'}</div><button class="btn btn-primary" onclick="openRepoModal()">New Repository</button></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(r => renderRepoCard(r)).join('');
+}
+
+function filterReposPage(query) { renderRepositories(); }
+
+// ==================== FILE MANAGER ====================
+async function renderFileManager() {
+  const grid = document.getElementById('fileGrid');
+  const breadcrumb = document.getElementById('fileBreadcrumb');
+
+  if (!state.selectedRepo) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">&#128193;</div><div class="empty-state-title">No repository selected</div><div class="empty-state-text">Select a repository from the dropdown above to browse files.</div></div>`;
+    breadcrumb.innerHTML = '';
+    return;
+  }
+
+  const [owner, repo] = state.selectedRepo.full_name.split('/');
+
+  // Breadcrumb
+  const parts = state.currentPath ? state.currentPath.split('/').filter(Boolean) : [];
+  let bcHtml = `<span class="breadcrumb-item" onclick="navigatePath('')">${escapeHtml(repo)}</span>`;
+  let buildPath = '';
+  parts.forEach((part, i) => {
+    buildPath += (buildPath ? '/' : '') + part;
+    const isLast = i === parts.length - 1;
+    bcHtml += `<span class="breadcrumb-separator">/</span><span class="breadcrumb-item ${isLast ? 'active' : ''}" ${isLast ? '' : `onclick="navigatePath('${escapeHtml(buildPath)}')"`}>${escapeHtml(part)}</span>`;
+  });
+  breadcrumb.innerHTML = bcHtml;
+
+  // Loading
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)"><div class="spinner" style="width:24px;height:24px;margin:0 auto 12px;border-width:2px"></div>Loading files...</div>';
+
+  try {
+    const contents = await getContents(owner, repo, state.currentPath);
+    if (!Array.isArray(contents)) {
+      // Single file - show editor
+      openFileEditor(contents);
+      return;
+    }
+    state.files = contents;
+    if (contents.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">&#128194;</div><div class="empty-state-title">Empty folder</div><div class="empty-state-text">This folder is empty. Create a new file or folder.</div></div>`;
+      return;
+    }
+    grid.innerHTML = contents.map(item => {
+      if (item.type === 'dir') {
+        return `<div class="file-item" onclick="navigatePath('${escapeHtml(item.path)}')">
+          <div class="file-icon">&#128193;</div>
+          <div class="file-name">${escapeHtml(item.name)}</div>
+          <div class="file-size">Folder</div>
+        </div>`;
+      }
+      return `<div class="file-item" onclick="openFile('${escapeHtml(item.path)}', '${item.sha}')">
+        <div class="file-icon">${getFileIcon(item.name)}</div>
+        <div class="file-name">${escapeHtml(item.name)}</div>
+        <div class="file-size">${formatSize(item.size)}</div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">&#9888;</div><div class="empty-state-title">Error loading files</div><div class="empty-state-text">${escapeHtml(err.message)}</div></div>`;
+  }
+}
+
+function navigatePath(path) {
+  state.currentPath = path;
+  renderFileManager();
+}
+
+function refreshFiles() { renderFileManager(); }
+
+async function openFile(path, sha) {
+  if (!state.selectedRepo) return;
+  const [owner, repo] = state.selectedRepo.full_name.split('/');
+  try {
+    const file = await getContents(owner, repo, path);
+    if (file.type === 'file') {
+      openFileEditor(file);
+    }
+  } catch (err) {
+    showToast('error', 'Error', err.message);
+  }
+}
+
+function openFileEditor(file) {
+  state.fileEditor.path = file.path || '';
+  state.fileEditor.sha = file.sha || '';
+  state.fileEditor.isNew = !file.sha;
+  document.getElementById('fileEditorTitle').textContent = state.fileEditor.isNew ? 'New File' : escapeHtml(file.name || file.path);
+  let content = '';
+  if (file.content && file.encoding === 'base64') {
+    content = b64DecodeUnicode(file.content);
+  }
+  document.getElementById('fileEditorContent').value = content;
+  updateFilePreview();
+  document.getElementById('fileEditorModal').classList.add('active');
+}
+
+function closeFileEditor() { document.getElementById('fileEditorModal').classList.remove('active'); }
+
+function updateFilePreview() {
+  const content = document.getElementById('fileEditorContent').value;
+  document.getElementById('fileEditorPreview').innerHTML = escapeHtml(content);
+}
+
+document.getElementById('fileEditorContent')?.addEventListener('input', updateFilePreview);
+
+async function saveFileFromEditor() {
+  if (!state.selectedRepo) return;
+  const [owner, repo] = state.selectedRepo.full_name.split('/');
+  const content = document.getElementById('fileEditorContent').value;
+  const path = state.fileEditor.path;
+  const sha = state.fileEditor.sha;
+  const message = state.fileEditor.isNew ? `Create ${path}` : `Update ${path}`;
+
+  document.getElementById('saveFileBtn').disabled = true;
+  try {
+    await createOrUpdateFile(owner, repo, path, message, content, sha, state.selectedRepo.default_branch);
+    closeFileEditor();
+    showToast('success', 'File Saved', `${path} has been saved.`);
+    addActivity(state.fileEditor.isNew ? 'file-created' : 'file-updated', `${state.fileEditor.isNew ? 'Created' : 'Updated'} file ${path} in ${repo}`);
+    renderFileManager();
+  } catch (err) {
+    showToast('error', 'Save Failed', err.message);
+  } finally {
+    document.getElementById('saveFileBtn').disabled = false;
+  }
+}
+
+function createNewFile() {
+  if (!state.selectedRepo) { showToast('warning', 'Select Repository', 'Please select a repository first.'); return; }
+  const fileName = prompt('Enter file name (with path, e.g. src/index.js):');
+  if (!fileName) return;
+  state.fileEditor.path = (state.currentPath ? state.currentPath + '/' : '') + fileName;
+  state.fileEditor.sha = '';
+  state.fileEditor.isNew = true;
+  document.getElementById('fileEditorTitle').textContent = 'New File: ' + escapeHtml(state.fileEditor.path);
+  document.getElementById('fileEditorContent').value = '';
+  updateFilePreview();
+  document.getElementById('fileEditorModal').classList.add('active');
+}
+
+function createNewFolder() {
+  if (!state.selectedRepo) { showToast('warning', 'Select Repository', 'Please select a repository first.'); return; }
+  const folderName = prompt('Enter folder name:');
+  if (!folderName) return;
+  const path = (state.currentPath ? state.currentPath + '/' : '') + folderName + '/.gitkeep';
+  state.fileEditor.path = path;
+  state.fileEditor.sha = '';
+  state.fileEditor.isNew = true;
+  document.getElementById('fileEditorTitle').textContent = 'New Folder: ' + escapeHtml(folderName);
+  document.getElementById('fileEditorContent').value = '';
+  updateFilePreview();
+  document.getElementById('fileEditorModal').classList.add('active');
+}
+
+async function deleteFile(path, sha) {
+  if (!state.selectedRepo) return;
+  const [owner, repo] = state.selectedRepo.full_name.split('/');
+  showConfirm('Delete File', `Are you sure you want to delete "${path}"? This action cannot be undone.`, async () => {
+    try {
+      await deleteFileAPI(owner, repo, path, `Delete ${path}`, sha, state.selectedRepo.default_branch);
+      showToast('success', 'File Deleted', `${path} has been deleted.`);
+      addActivity('file-deleted', `Deleted file ${path} from ${repo}`);
+      renderFileManager();
+    } catch (err) {
+      showToast('error', 'Delete Failed', err.message);
+    }
+  });
+}
+
+// ==================== DEPLOY ====================
+function renderDeploy() {
+  const list = document.getElementById('deployFileList');
+  if (state.deployQueue.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128193;</div><div class="empty-state-title">No files selected</div><div class="empty-state-text">Drop files or folders above, or click to browse.</div></div>';
+    return;
+  }
+  list.innerHTML = state.deployQueue.map((f, i) => `
+    <div class="deploy-file-item">
+      <div class="deploy-file-path">${escapeHtml(f.path)}</div>
+      <div class="deploy-file-status ${f.status || 'pending'}">${f.status === 'success' ? '&#10003; Done' : f.status === 'error' ? '&#10007; Failed' : f.status === 'uploading' ? '&#9654; Uploading...' : '&#9679; Pending'}</div>
+      <button class="top-btn btn-sm" onclick="removeDeployFile(${i})" style="padding:4px 8px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  `).join('');
+}
+
+function handleDeployDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  const items = e.dataTransfer.items;
+  if (items) {
+    const promises = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i].webkitGetAsEntry();
+      if (item) promises.push(traverseFileTree(item));
+    }
+    Promise.all(promises).then(() => renderDeploy());
+  }
+}
+
+function traverseFileTree(item, path = '') {
+  return new Promise((resolve) => {
+    if (item.isFile) {
+      item.file(file => {
+        state.deployQueue.push({ file, path: path + file.name, status: 'pending' });
+        resolve();
+      });
+    } else if (item.isDirectory) {
+      const dirReader = item.createReader();
+      dirReader.readEntries(entries => {
+        const promises = entries.map(entry => traverseFileTree(entry, path + item.name + '/'));
+        Promise.all(promises).then(resolve);
+      });
+    }
+  });
+}
+
+function handleDeployFiles(files) {
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const relativePath = file.webkitRelativePath || file.name;
+    state.deployQueue.push({ file, path: relativePath, status: 'pending' });
+  }
+  renderDeploy();
+}
+
+function removeDeployFile(index) {
+  state.deployQueue.splice(index, 1);
+  renderDeploy();
+}
+
+function clearDeployQueue() {
+  state.deployQueue = [];
+  document.getElementById('deployProgress').style.display = 'none';
+  renderDeploy();
+}
+
+async function startDeploy() {
+  if (!state.selectedRepo) { showToast('warning', 'Select Repository', 'Please select a target repository.'); return; }
+  if (state.deployQueue.length === 0) { showToast('warning', 'No Files', 'Please add files to deploy.'); return; }
+
+  const [owner, repo] = state.selectedRepo.full_name.split('/');
+  const branch = document.getElementById('deployBranch').value || 'main';
+  const message = document.getElementById('deployMessage').value || 'Deploy from GitFlow Pro';
+  const overwrite = document.getElementById('deployOverwrite').checked;
+
+  document.getElementById('deployBtn').disabled = true;
+  document.getElementById('deployProgress').style.display = 'block';
+
+  for (let i = 0; i < state.deployQueue.length; i++) {
+    const item = state.deployQueue[i];
+    item.status = 'uploading';
+    renderDeploy();
+    const progress = ((i + 1) / state.deployQueue.length) * 100;
+    document.getElementById('deployProgressFill').style.width = progress + '%';
+
+    try {
+      const content = await readFileAsText(item.file);
+      let sha = null;
+      if (overwrite) {
+        try {
+          const existing = await getContents(owner, repo, item.path, branch);
+          if (existing && existing.sha) sha = existing.sha;
+        } catch (e) {}
+      }
+      await createOrUpdateFile(owner, repo, item.path, message, content, sha, branch);
+      item.status = 'success';
+    } catch (err) {
+      item.status = 'error';
+      showToast('error', 'Deploy Error', `Failed to upload ${item.path}: ${err.message}`);
+    }
+    renderDeploy();
+  }
+
+  document.getElementById('deployBtn').disabled = false;
+  document.getElementById('deployProgressFill').style.width = '100%';
+  const successCount = state.deployQueue.filter(f => f.status === 'success').length;
+  showToast('success', 'Deploy Complete', `${successCount}/${state.deployQueue.length} files deployed successfully.`);
+  addActivity('deploy', `Deployed ${successCount} files to ${repo}`);
+}
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+
+// ==================== REPO MODAL ====================
+function openRepoModal() { document.getElementById('repoForm').reset(); document.getElementById('repoModal').classList.add('active'); }
+function closeRepoModal() { document.getElementById('repoModal').classList.remove('active'); }
+
+async function createRepo() {
+  const name = document.getElementById('repoName').value.trim();
+  if (!name) { document.getElementById('repoName').closest('.form-group').classList.add('has-error'); return; }
+  document.getElementById('repoName').closest('.form-group').classList.remove('has-error');
+
+  const data = {
+    name,
+    description: document.getElementById('repoDesc').value.trim(),
+    private: document.getElementById('repoVisibility').value === 'private',
+    auto_init: document.getElementById('repoAutoInit').value === 'true'
+  };
+
+  try {
+    const repo = await createRepoAPI(data);
+    state.repos.unshift(repo);
+    state.selectedRepo = repo;
+    saveState();
+    updateRepoSelector();
+    closeRepoModal();
+    showToast('success', 'Repository Created', `${name} has been created.`);
+    addActivity('repo-created', `Created repository ${name}`);
+    if (state.currentPage === 'dashboard' || state.currentPage === 'repositories') renderPage(state.currentPage);
+  } catch (err) {
+    showToast('error', 'Create Failed', err.message);
+  }
+}
+
+// ==================== CONFIRM MODAL ====================
+let confirmCallback = null;
+function showConfirm(title, text, callback) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmText').textContent = text;
+  confirmCallback = callback;
+  document.getElementById('confirmModal').classList.add('active');
+}
+function closeConfirmModal() { document.getElementById('confirmModal').classList.remove('active'); confirmCallback = null; }
+function executeConfirm() { if (confirmCallback) { confirmCallback(); confirmCallback = null; } closeConfirmModal(); }
+
+// ==================== ACTIVITY ====================
+function renderActivity() {
+  const log = document.getElementById('fullActivityLog');
+  if (state.activityLog.length === 0) {
+    log.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128220;</div><div class="empty-state-title">No activity yet</div><div class="empty-state-text">Activity will appear here as you work with repositories.</div></div>';
+    return;
+  }
+  log.innerHTML = state.activityLog.map(a => renderActivityItem(a)).join('');
+}
+
+function clearActivityLog() {
+  showConfirm('Clear Activity Log', 'Are you sure you want to clear all activity history?', () => {
+    state.activityLog = [];
+    saveState();
+    renderActivity();
+    showToast('success', 'Cleared', 'Activity log has been cleared.');
+  });
+}
+
+// ==================== SETTINGS ====================
+function renderSettings() {
+  document.getElementById('settingsToken').value = state.token || '';
+  document.getElementById('toggleLightMode').classList.toggle('active', state.settings.lightMode);
+}
+
+function saveSettingsToken() {
+  const token = document.getElementById('settingsToken').value.trim();
+  if (!token) { showToast('error', 'Invalid Token', 'Please enter a valid token.'); return; }
+  state.token = token;
+  saveState();
+  showToast('success', 'Token Updated', 'Your GitHub token has been updated.');
+}
+
+function toggleLightMode() {
+  state.settings.lightMode = !state.settings.lightMode;
+  document.body.classList.toggle('light-mode', state.settings.lightMode);
+  document.getElementById('toggleLightMode').classList.toggle('active', state.settings.lightMode);
+  saveState();
+}
+
+function exportAllData() {
+  const data = { settings: state.settings, activityLog: state.activityLog, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `gitflow-export-${new Date().toISOString().split('T')[0]}.json`; a.click();
+  URL.revokeObjectURL(url);
+  showToast('success', 'Export Complete', 'Settings and activity log exported.');
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.settings) state.settings = { ...state.settings, ...data.settings };
+      if (data.activityLog) state.activityLog = data.activityLog;
+      saveState();
+      renderSettings();
+      showToast('success', 'Import Complete', 'Data imported successfully.');
+    } catch (err) { showToast('error', 'Import Failed', 'Invalid JSON file.'); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function confirmClearAll() {
+  showConfirm('Clear All Data', 'This will permanently delete all local settings and activity history. This cannot be undone.', () => {
+    state.settings = { lightMode: false };
+    state.activityLog = [];
+    saveState();
+    renderSettings();
+    showToast('success', 'Cleared', 'All local data has been cleared.');
+  });
+}
+
+// ==================== SEARCH ====================
+function handleGlobalSearch(query) {
+  if (state.currentPage === 'repositories') {
+    document.getElementById('repoSearchInput').value = query;
+    renderRepositories();
+  }
+}
+
+// ==================== KEYBOARD SHORTCUTS ====================
+let keyBuffer = [];
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+    document.getElementById('repoSelectorDropdown').classList.remove('open');
+    return;
+  }
+  keyBuffer.push(e.key.toLowerCase());
+  if (keyBuffer.length > 2) keyBuffer.shift();
+  const combo = keyBuffer.join('');
+  if (combo === 'gd') { e.preventDefault(); navigateTo('dashboard'); }
+  else if (combo === 'gr') { e.preventDefault(); navigateTo('repositories'); }
+  else if (combo === 'gf') { e.preventDefault(); navigateTo('files'); }
+  else if (combo === 'nn') { e.preventDefault(); openRepoModal(); }
+  else if (e.key === '/') { e.preventDefault(); document.getElementById('globalSearch')?.focus(); }
+});
+
+// ==================== OFFLINE DETECTION ====================
+window.addEventListener('online', () => {
+  state.isOnline = true;
+  document.getElementById('offlineBanner').classList.remove('visible');
+  showToast('info', 'Back Online', 'You are back online.');
+});
+window.addEventListener('offline', () => {
+  state.isOnline = false;
+  document.getElementById('offlineBanner').classList.add('visible');
+  showToast('warning', 'Offline', 'You are offline. Some features may not work.');
+});
+
+// Close dropdowns on outside click
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('repoSelectorDropdown');
+  const btn = document.getElementById('repoSelectorBtn');
+  if (dropdown && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+    dropdown.classList.remove('open');
+  }
+});
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+
+  if (state.settings.lightMode) document.body.classList.add('light-mode');
+
+  if (state.token && state.user) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'flex';
+    updateUserInfo();
+    loadRepos().then(() => {
+      navigateTo('dashboard');
+    });
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('appContainer').style.display = 'none';
+  }
+
+  if (!state.isOnline) document.getElementById('offlineBanner').classList.add('visible');
+
+  setTimeout(() => { document.getElementById('loadingOverlay').classList.add('hidden'); }, 500);
+});
+</script>
+</body>
+</html>
