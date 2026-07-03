@@ -6,6 +6,13 @@
 <meta name="description" content="GitFlow Pro - Enterprise GitHub Repository Management & Deployment">
 <meta name="theme-color" content="#0f172a">
 <title>GitFlow Pro - GitHub Deployment</title>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- PWA icons (fallback) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+
 <style>
   :root {
     --bg-primary: #0f172a;
@@ -301,13 +308,6 @@
     font-family: var(--font-mono); font-size: 13px; line-height: 1.6;
     white-space: pre-wrap; word-break: break-all;
   }
-
-  /* Syntax highlighting */
-  .sh-keyword { color: #c678dd; }
-  .sh-string { color: #98c379; }
-  .sh-comment { color: #5c6370; font-style: italic; }
-  .sh-number { color: #d19a66; }
-  .sh-function { color: #61afef; }
 
   /* ===== DEPLOY PANEL ===== */
   .deploy-panel { padding: 24px; }
@@ -1901,6 +1901,13 @@ document.addEventListener('click', (e) => {
     dropdown.classList.remove('open');
   }
 });
+
+// ==================== REGISTER SERVICE WORKER ====================
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('Service Worker registered'))
+    .catch(err => console.warn('SW registration failed:', err));
+}
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
