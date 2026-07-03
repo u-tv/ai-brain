@@ -10,7 +10,7 @@
 <!-- PWA Manifest -->
 <link rel="manifest" href="manifest.json">
 
-<!-- PWA icons (fallback) -->
+<!-- Fallback icon -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 
 <style>
@@ -233,10 +233,10 @@
   .section-body { padding: 0; }
 
   /* ===== REPO CARDS ===== */
-  .repos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding: 24px; }
+  .repos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; padding: 24px; }
   .repo-card {
     background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md);
-    padding: 20px; cursor: pointer; transition: all var(--transition); position: relative; overflow: hidden;
+    padding: 20px; cursor: default; transition: all var(--transition); position: relative; overflow: hidden;
   }
   .repo-card:hover { border-color: var(--border-light); transform: translateY(-2px); box-shadow: var(--shadow-md); }
   .repo-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
@@ -247,8 +247,9 @@
   }
   .repo-card-meta { display: flex; gap: 16px; margin-bottom: 12px; font-size: 12px; color: var(--text-muted); }
   .repo-card-meta span { display: flex; align-items: center; gap: 4px; }
-  .repo-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); }
+  .repo-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
   .repo-card-branch { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+  .repo-card-actions { display: flex; gap: 6px; }
 
   .badge {
     display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px;
@@ -670,7 +671,6 @@
     100% { transform: translateY(0); }
   }
 
-  /* Responsive tweaks */
   @media (max-width: 600px) {
     .install-banner {
       bottom: 16px;
@@ -1506,7 +1506,11 @@ function renderDashboard() {
 function renderRepoCard(r) {
   const lang = r.language || 'Unknown';
   const langColor = getLanguageColor(lang);
-  return `<div class="repo-card" onclick="selectRepo('${r.full_name}');navigateTo('files')">
+  const ghUrl = `https://github.com/${r.full_name}`;
+  const pagesUrl = `https://${r.owner.login}.github.io/${r.name}`;
+  const hasPages = r.has_pages || false;
+
+  return `<div class="repo-card">
     <div class="repo-card-header">
       <div><div class="repo-card-title">${escapeHtml(r.name)}</div></div>
       <span class="badge ${r.private ? 'badge-private' : 'badge-public'}">${r.private ? 'Private' : 'Public'}</span>
@@ -1520,6 +1524,20 @@ function renderRepoCard(r) {
     <div class="repo-card-footer">
       <div class="repo-card-branch">${r.default_branch || 'main'}</div>
       <div style="font-size:11px;color:var(--text-muted)">Updated ${formatDate(r.updated_at)}</div>
+    </div>
+    <div class="repo-card-actions" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-sm btn-primary" onclick="selectRepo('${r.full_name}');navigateTo('files')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Manage Files
+      </button>
+      <button class="btn btn-sm btn-default" onclick="window.open('${ghUrl}', '_blank')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        GitHub
+      </button>
+      ${hasPages ? `<button class="btn btn-sm btn-success" onclick="window.open('${pagesUrl}', '_blank')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Preview
+      </button>` : ''}
     </div>
   </div>`;
 }
